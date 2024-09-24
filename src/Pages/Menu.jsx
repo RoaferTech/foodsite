@@ -1,17 +1,39 @@
-import React, { useState } from "react";
-import { dishesData } from "../data/dishes";
+import React, { useState, useEffect } from "react";
+
+import { getAllDishes } from "../services/dishServices";
 import DishTab from "../components/DishTab";
 import DishCard from "../components/DishCard";
 import Company from "../components/Company";
 
 const Menu = () => {
+  const [dishes, setDishes] = useState([]);
   const [activeTab, setActiveTab] = useState("All");
-  const filteredDishes =
-    activeTab === "All"
-      ? dishesData
-      : dishesData.filter((dish) => dish.category === activeTab);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const categories = ["All", "Breakfast", "Main Dishes", "Drinks", "Desserts"];
+  useEffect(() => {
+    const fetchDishes = async () => {
+      setLoading(true);
+      try {
+        const fetchedDishes = await getAllDishes();
+        setDishes(fetchedDishes);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishes();
+  }, []);
+
+  console.log(dishes[0]?.image);
+
+  const filteredDishes =
+    activeTab === "All"
+      ? dishes
+      : dishes.filter((dish) => dish.category === activeTab);
 
   return (
     <>
@@ -28,12 +50,20 @@ const Menu = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        <div className="py-[30px] md:py-[50px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
-          {filteredDishes.map((dish, index) => (
-            <DishCard key={index} {...dish} />
-          ))}
-        </div>
+        {error && (
+          <p className="text-red-500 text-center mt-4">Error: {error}</p>
+        )}
+        {loading ? (
+          <p className="text-center mt-4">Loading...</p>
+        ) : (
+          <div className="py-[30px] md:py-[50px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+            {filteredDishes.map((dish, index) => (
+              <DishCard key={index} {...dish} />
+            ))}
+          </div>
+        )}
       </div>
+
       <Company />
     </>
   );
