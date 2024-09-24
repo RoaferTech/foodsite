@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { sendContactMessage } from "../services/contactService";
 const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -7,15 +7,27 @@ const ContactUs = () => {
     subject: "",
     message: "",
   });
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log(formData);
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      await sendContactMessage(formData);
+      setSuccess("Your message has been sent successfully!");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,6 +40,8 @@ const ContactUs = () => {
         </p>
       </div>
       <div className="bg-white shadow-lg rounded-xl p-8 md:p-12 max-w-3xl w-full">
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {success && <div className="text-green-500 mb-4">{success}</div>}
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
