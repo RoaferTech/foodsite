@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { bookTable } from "../services/apiServices";
 const BookTable = () => {
   const [formData, setFormData] = useState({
     date: "",
@@ -8,17 +8,33 @@ const BookTable = () => {
     phone: "",
     person: "1 Person",
   });
-
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+  console.log(message);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      const response = await bookTable(formData);
+      setMessage(response.message);
+      setError("");
+      setFormData({
+        date: "",
+        time: "",
+        name: "",
+        phone: "",
+        person: "1 Person",
+      });
+    } catch (err) {
+      setError(err.message);
+      setMessage("");
+    }
   };
 
   return (
@@ -30,6 +46,14 @@ const BookTable = () => {
           need to create a truly remarkable dining experience.
         </p>
       </div>
+      {message && (
+        <p className="text-green-600 font-semibold mb-4 capitalize">
+          {message}
+        </p>
+      )}
+      {error && (
+        <p className="text-red-600 font-semibold mb-4 capitalize">{error}</p>
+      )}
       <div className="bg-white shadow-lg rounded-xl px-8 py-10 md:px-12 w-full max-w-3xl relative mb-10">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

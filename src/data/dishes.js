@@ -56,6 +56,7 @@ export const dishesData = [
     descr: "Main dish",
     category: "Main Dishes",
   },
+
   {
     imgUrl: d8,
     price: 12.99,
